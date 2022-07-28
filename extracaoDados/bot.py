@@ -24,9 +24,6 @@ def CotacaoDolar(navegador_dolar):
 
     return cotacao_dolar
 
-# dolar = CotacaoDolar('https://www.google.com.br/')
-# print(dolar)
-
 # # Abrir site google
 def CotacaoEuro(navegador_euro):
     navegador.get(navegador_euro)
@@ -41,8 +38,6 @@ def CotacaoEuro(navegador_euro):
     cotacao_euro=navegador.find_element('xpath','//*[@id="knowledge-currency__updatable-data-column"]/div[1]/div[2]/span[1]').get_attribute('data-value')
 
     return cotacao_euro
-# euro = CotacaoEuro('https://www.google.com.br/')
-# print(euro)
 
 # # Abrir site google
 def CotacaoOuro(navegador_outro):
@@ -53,9 +48,6 @@ def CotacaoOuro(navegador_outro):
     cotacao_ouro=cotacao_ouro.replace(",",".")
 
     return cotacao_ouro
-# ouro = CotacaoOuro('https://www.melhorcambio.com/ouro-hoje')
-# print(euro)
-
 
 #Dados para inserção
 data = str(date.today())
