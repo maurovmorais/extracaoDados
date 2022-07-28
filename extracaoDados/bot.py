@@ -1,59 +1,92 @@
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-import pandas as pd
+from pyodbc import Error
+import sql
+import time
 from datetime import date
+import conecta
 
 # Criar objeto Navegador
 navegador = webdriver.Chrome()
 
 # Abrir site google
-navegador.get('https://www.google.com.br/')
+def CotacaoDolar(navegador_dolar):
+    navegador.get(navegador_dolar)
 
-#Fazer a Pesquisa Cotação do Dolar
-navegador.find_element('xpath','/html/body/div[1]/div[3]/form/div[1]/div[1]/div[1]/div/div[2]/input').send_keys("cotação dólar")
+    #Fazer a Pesquisa Cotação do Dolar
+    navegador.find_element('xpath','/html/body/div[1]/div[3]/form/div[1]/div[1]/div[1]/div/div[2]/input').send_keys("cotação dólar")
 
-# Clicar enter
-navegador.find_element('xpath','/html/body/div[1]/div[3]/form/div[1]/div[1]/div[1]/div/div[2]/input').send_keys(Keys.ENTER)
+    # Clicar enter
+    navegador.find_element('xpath','/html/body/div[1]/div[3]/form/div[1]/div[1]/div[1]/div/div[2]/input').send_keys(Keys.ENTER)
 
-# Pegar o valor da cotação do dolar
-cotacao_dolar=navegador.find_element('xpath','//*[@id="knowledge-currency__updatable-data-column"]/div[1]/div[2]/span[1]').get_attribute('data-value')
+    # Pegar o valor da cotação do dolar
+    cotacao_dolar=navegador.find_element('xpath','//*[@id="knowledge-currency__updatable-data-column"]/div[1]/div[2]/span[1]').get_attribute('data-value')
 
-print(cotacao_dolar)
+    return cotacao_dolar
 
-# Abrir site google
-navegador.get('https://www.google.com.br/')
+# dolar = CotacaoDolar('https://www.google.com.br/')
+# print(dolar)
 
-#Fazer a Pesquisa Cotação do Euro
-navegador.find_element('xpath','/html/body/div[1]/div[3]/form/div[1]/div[1]/div[1]/div/div[2]/input').send_keys("cotação euro")
+# # Abrir site google
+def CotacaoEuro(navegador_euro):
+    navegador.get(navegador_euro)
 
-# Clicar enter
-navegador.find_element('xpath','/html/body/div[1]/div[3]/form/div[1]/div[1]/div[1]/div/div[2]/input').send_keys(Keys.ENTER)
+    #Fazer a Pesquisa Cotação do Euro
+    navegador.find_element('xpath','/html/body/div[1]/div[3]/form/div[1]/div[1]/div[1]/div/div[2]/input').send_keys("cotação euro")
 
-# Pegar o valor da cotação do Euro
-cotacao_euro=navegador.find_element('xpath','//*[@id="knowledge-currency__updatable-data-column"]/div[1]/div[2]/span[1]').get_attribute('data-value')
+    # Clicar enter
+    navegador.find_element('xpath','/html/body/div[1]/div[3]/form/div[1]/div[1]/div[1]/div/div[2]/input').send_keys(Keys.ENTER)
 
-print(cotacao_euro)
+    # Pegar o valor da cotação do Euro
+    cotacao_euro=navegador.find_element('xpath','//*[@id="knowledge-currency__updatable-data-column"]/div[1]/div[2]/span[1]').get_attribute('data-value')
 
-# Abrir site google
-navegador.get('https://www.melhorcambio.com/ouro-hoje')
+    return cotacao_euro
+# euro = CotacaoEuro('https://www.google.com.br/')
+# print(euro)
 
-# Pegar o valor da cotação do ouro
-cotacao_ouro=navegador.find_element('xpath','//*[@id="comercial"]').get_attribute('value')
-cotacao_ouro=cotacao_ouro.replace(",",".")
-print(cotacao_ouro)
+# # Abrir site google
+def CotacaoOuro(navegador_outro):
+    navegador.get('https://www.melhorcambio.com/ouro-hoje')
+
+    # Pegar o valor da cotação do ouro
+    cotacao_ouro=navegador.find_element('xpath','//*[@id="comercial"]').get_attribute('value')
+    cotacao_ouro=cotacao_ouro.replace(",",".")
+
+    return cotacao_ouro
+# ouro = CotacaoOuro('https://www.melhorcambio.com/ouro-hoje')
+# print(euro)
+
+
+#Dados para inserção
+data = str(date.today())
+cotacao_dolar = CotacaoDolar('https://www.google.com.br/')
+cotacao_euro = CotacaoEuro('https://www.google.com.br/')
+cotacao_ouro = CotacaoOuro('https://www.melhorcambio.com/ouro-hoje')
+
+# Inserir dados na Tabela do Banco de Dados
+vcon=conecta.ConexaoBanco()
+#Query
+vsql  = f"""insert into cotacaoMoedas(data,cotacao_dolar,cotacao_euro,cotacao_ouro) 
+	values('{data}','{cotacao_dolar}','{cotacao_euro}','{cotacao_ouro}')"""
+
+def inserte(conexao,sql):  
+    try: 
+        cursor = conexao.cursor()
+        cursor.execute(sql)
+        conexao.commit()
+        print("Dado inserido !!!")
+    except Error as ex:
+        print(f"Erro encontrado !!!!",ex)
+ 
+inserte(vcon,vsql)
+
+##### Fechar Conexão
+if True:
+    vcon.close()
+    print("Conexão fechada")
 
 # Fechar o Browser
 navegador.quit()
 
-# Salvar pesquisa no Excel
 
-tabela =  pd.read_excel(r"C:\Projetos\extracaoDados\extracaoDados\cotacaoMoedas_Outro.xlsx")
-
-tabela.loc[1,"data"] = date.today()
-tabela.loc[1,"dolar"] = float(cotacao_dolar)
-tabela.loc[1,"euro"] = float(cotacao_euro)
-tabela.loc[1,"ouro"] = float(cotacao_ouro)
-
-
-tabela.to_excel("C:\Projetos\extracaoDados\extracaoDados\cotacaoMoedas_Outro.xlsx",index=False)
 
