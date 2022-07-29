@@ -1,11 +1,16 @@
-from pickle import TRUE
-from re import T
-from sql import connect
+import conecta
+import sql
+import time
+from datetime import date, datetime
 
-vcon=connect.ConexaoBanco()
+# Inicio Execução
+started = datetime.now()
+print("Inicio Execução: ",started)
+
+vcon=conecta.ConexaoBanco()
 
 #Query
-vsql = """Select * from Vendas"""
+vsql = f"""Select * from cotacaoMoedas"""
 
 ##### Consulta Banco
 def Consultar(conexao,sql): 
@@ -23,5 +28,6 @@ if True:
     vcon.close()
     print("Conexão fechada")
 
-
-
+# Fim Execução
+finished = datetime.now()
+print("Fim Execução: ",finished)
